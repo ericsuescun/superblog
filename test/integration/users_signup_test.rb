@@ -24,6 +24,7 @@ class UsersSignupTest < ActionDispatch::IntegrationTest
       end
       follow_redirect!
       assert_template 'users/show'
-      assert_not flash.empty?
-    end
+      assert_not flash.empty?     #Este es para chequear que el aviso esté
+      assert is_logged_in?        #Y este para que una vez registrado, de una vez se loguee.
+  end
 end
