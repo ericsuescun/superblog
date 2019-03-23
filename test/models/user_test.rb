@@ -64,11 +64,15 @@ class UserTest < ActiveSupport::TestCase
   test "password should be present (nonblank)" do
       @user.password = @user.password_confirmation = " " * 6    #Aca hay doble confirmacion de que no esten vacíos
       assert_not @user.valid?
-    end
+  end
 
-    test "password should have a minimum length" do
+  test "password should have a minimum length" do
       @user.password = @user.password_confirmation = "a" * 5    #Y en esta que sean más de 6 caracteres
       assert_not @user.valid?
-    end
+  end
+
+  test "authenticated? should return false for a user with nil digest" do
+      assert_not @user.authenticated?('')
+  end
 
 end
