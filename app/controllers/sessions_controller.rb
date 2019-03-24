@@ -10,7 +10,8 @@ class SessionsController < ApplicationController
       log_in @user   #Usa el método SESSION de Rails para guardar el id de ususario
       params[:session][:remember_me] == '1' ? remember(@user) : forget(@user)
       #remember @user   #Se implementa ya el método remember de modo que el usuario sea recordado de una vez
-      redirect_to @user  #Rails automáticamente busca la ruta del user (user_url(user))
+      #redirect_to @user  #Rails automáticamente busca la ruta del user (user_url(user))
+      redirect_back_or @user   #Comento el redirect_to anterior y dejo este que almacena para donde iba el usuario o, en su defecto, user que era lo que había
   	else
   		flash.now[:danger] = 'Invalid email/password combination'
   		render 'new'

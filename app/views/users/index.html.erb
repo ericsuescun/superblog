@@ -1,0 +1,10 @@
+<% provide(:title, 'All users') %>
+<h1>All users</h1>
+
+<%= will_paginate %>
+
+<ul class="users">
+  <%= render @users %>	<!-- render buscará un partial de nombre _user por defecto. También RENDER "entiende" que @users es una coleccion de objetos, por lo que los itera con el partial y no hay que hacer bloque de EACH DO -->
+</ul>
+
+<%= will_paginate %>
