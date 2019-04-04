@@ -29,14 +29,32 @@ class User < ApplicationRecord
 	end
 
 	# Returns true if the given token matches the digest.
-	def authenticated?(remember_token)
-		return false if remember_digest.nil?
-	    BCrypt::Password.new(remember_digest).is_password?(remember_token)
+	# def authenticated?(remember_token)
+	# 	return false if remember_digest.nil?
+	#     BCrypt::Password.new(remember_digest).is_password?(remember_token)
+	# end
+
+	def authenticated?(attribute, token)
+		digest = send("#{attribute}_digest")	#Remember the metacprogramming: Send is a method for sending commands or messages, in this case, the argument is interpolated and can be activation or remember.
+		return false if digest.nil?
+		BCrypt::Password.new(digest).is_password?(token)	#Comparison method by Bcrypt
 	end
 
 	# Forgets a user.
 	def forget
 	    update_attribute(:remember_digest, nil)
+	end
+
+	# Activates an account.
+	def activate
+	    # update_attribute(:activated,    true)
+	    # update_attribute(:activated_at, Time.zone.now)
+	    update_columns(activated: true, activated_at: Time.zone.now)
+	end
+
+	# Sends activation email.
+	def send_activation_email
+	    UserMailer.account_activation(self).deliver_now
 	end
 
 	private
