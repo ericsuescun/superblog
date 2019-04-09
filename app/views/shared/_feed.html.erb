@@ -1,0 +1,6 @@
+<% if @feed_items.any? %>
+  <ol class="microposts">
+    <%= render @feed_items %>	<!-- feed_items are micropost class, so Rails goes to the micrpost partials to display them -->
+  </ol>
+  <%= will_paginate @feed_items %>
+<% end %>
