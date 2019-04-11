@@ -88,10 +88,18 @@ class User < ApplicationRecord
 		reset_sent_at < 2.hours.ago
 	end
 
-	# Defines a proto-feed.
-	# See "Following users" for the full implementation.
+	# This ones are the first implementations of the feed but, as the application grows in users, it's going to start going slow. So the actual feed is implemented with SQL sentences almost directly so the DB Engine does the heavy lifting on findind users and its relationships
+	#def feed
+		# Micropost.where("user_id = ?", id) 	#This is a proto feed of only user microposts
+		#Micropost.where("user_id IN (?) OR user_id = ?", following_ids, id) #This is a more real one
+	#end
+
+	# Returns a user's status feed.
 	def feed
-		Micropost.where("user_id = ?", id)
+	  following_ids = "SELECT followed_id FROM relationships
+	                   WHERE  follower_id = :user_id"
+	  Micropost.where("user_id IN (#{following_ids})
+	                   OR user_id = :user_id", user_id: id)
 	end
 
 	# Follows a user.
