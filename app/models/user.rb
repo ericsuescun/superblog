@@ -2,6 +2,18 @@ class User < ApplicationRecord
 
 	has_many :microposts, dependent: :destroy	#Dependence marked
 
+	#In this case active_... means a kind of relationship by the nature of the blog we are doing, and that's why is needed to specify class_name etc... it's not conventional. This is true too for the other one down lines called "passive_..."
+	has_many :active_relationships, class_name:  "Relationship",
+	                                  foreign_key: "follower_id",
+	                                  dependent:   :destroy
+	has_many :passive_relationships, class_name:  "Relationship",
+	                                   foreign_key: "followed_id",
+	                                   dependent:   :destroy
+	
+	has_many :following, through: :active_relationships, source: :followed 	#source followed tells Rails that source for the followed array is "followed" ids. Overide the convention for not using followed"s". This association also allows to do: user.following.include?(other_user) and user.following.find(other_user), and so, do: user.following << other_user and user.following.delete(other_user) like an array
+
+    has_many :followers, through: :passive_relationships, source: :follower 	#In this case source: :follower is specified just to keep going with what is done up lines, but as is completelly conventional and standard, we could have omitted it
+
 	attr_accessor :remember_token, :activation_token, :reset_token
 	before_save   :downcase_email
 	before_create :create_activation_digest
@@ -76,10 +88,33 @@ class User < ApplicationRecord
 		reset_sent_at < 2.hours.ago
 	end
 
-	# Defines a proto-feed.
-	# See "Following users" for the full implementation.
+	# This ones are the first implementations of the feed but, as the application grows in users, it's going to start going slow. So the actual feed is implemented with SQL sentences almost directly so the DB Engine does the heavy lifting on findind users and its relationships
+	#def feed
+		# Micropost.where("user_id = ?", id) 	#This is a proto feed of only user microposts
+		#Micropost.where("user_id IN (?) OR user_id = ?", following_ids, id) #This is a more real one
+	#end
+
+	# Returns a user's status feed.
 	def feed
-		Micropost.where("user_id = ?", id)
+	  following_ids = "SELECT followed_id FROM relationships
+	                   WHERE  follower_id = :user_id"
+	  Micropost.where("user_id IN (#{following_ids})
+	                   OR user_id = :user_id", user_id: id)
+	end
+
+	# Follows a user.
+	def follow(other_user)
+	  following << other_user
+	end
+
+	# Unfollows a user.
+	def unfollow(other_user)
+	  following.delete(other_user)
+	end
+
+	# Returns true if the current user is following the other user.
+	def following?(other_user)
+	  following.include?(other_user)
 	end
 
 	private
